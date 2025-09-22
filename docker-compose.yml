@@ -1,0 +1,32 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:6-alpine
+    ports: ["6379:6379"]
+
+  users-api:
+    build: ./users-api
+    ports: ["8083:8083"]
+
+  auth-api:
+    build: ./auth-api
+    ports: ["8081:8081"]
+
+  todos-api:
+    build: ./todos-api
+    environment:
+      - REDIS_HOST=redis
+      - USERS_API_URL=http://users-api:8083
+    ports: ["8082:8082"]
+    depends_on: [ redis, users-api ]
+
+  log-message-processor:
+    build: ./log-message-processor
+    environment:
+      - REDIS_HOST=redis
+    depends_on: [ redis ]
+
+  frontend:
+    build: ./frontend
+    ports: ["8080:80"]
+    depends_on: [ auth-api, users-api, todos-api ]

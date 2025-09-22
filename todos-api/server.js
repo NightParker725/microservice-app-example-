@@ -46,6 +46,7 @@ const localServiceName = 'todos-api';
 const tracer = new Tracer({ctxImpl, recorder, localServiceName});
 
 
+
 app.use(jwt({ secret: jwtSecret }))
 app.use(zipkinMiddleware({tracer}));
 app.use(function (err, req, res, next) {
@@ -59,6 +60,30 @@ app.use(bodyParser.json())
 const routes = require('./routes')
 routes(app, {tracer, redisClient, logChannel})
 
+
 app.listen(port, function () {
   console.log('todo list RESTful API server started on: ' + port)
 })
+
+const { cacheAside } = require('./cache');
+
+app.get('/todos/:id', async (req, res) => {
+  try {
+    const todo = await cacheAside(`todo:${req.params.id}`, 60, () => repo.getTodoById(req.params.id));
+    res.json(todo);
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+
+const breaker = require('./cb');
+
+app.get('/todos/:id/user', async (req, res) => {
+  const todo = await repo.getTodoById(req.params.id).catch(() => null);
+  try {
+    const user = await breaker.fire(todo?.userId);
+    res.json({ todo, user });
+  } catch {
+    res.json({ todo, user: null, note: 'users-api degradado — circuito abierto' });
+  }
+});
+
