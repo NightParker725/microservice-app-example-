@@ -1,0 +1,27 @@
+version: "3.9"
+services:
+  redis:
+    image: redis:6-alpine
+
+  users-api:
+    image: app/users-api:${TAG}
+
+  auth-api:
+    image: app/auth-api:${TAG}
+
+  todos-api:
+    image: app/todos-api:${TAG}
+    environment:
+      - REDIS_HOST=redis
+      - USERS_API_URL=http://users-api:8083
+    depends_on: [ redis, users-api ]
+
+  log-message-processor:
+    image: app/log-message-processor:${TAG}
+    environment:
+      - REDIS_HOST=redis
+    depends_on: [ redis ]
+
+  frontend:
+    image: app/frontend:${TAG}
+    depends_on: [ auth-api, users-api, todos-api ]
