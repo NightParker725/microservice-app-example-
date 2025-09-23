@@ -1,32 +1,91 @@
 version: "3.9"
+
+networks:
+  microservices-network:
+    driver: bridge
+
 services:
+  # --- Servicio de Zipkin ---
+  # Añadido el servicio oficial de Zipkin para el tracing distribuido.
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    ports:
+      # El puerto 9411 es para la interfaz web de Zipkin.
+      - "9411:9411"
+    networks:
+      - microservices-network
+
   redis:
     image: redis:6-alpine
+    container_name: redis
     ports: ["6379:6379"]
+    networks:
+      - microservices-network
 
   users-api:
     build: ./users-api
+    container_name: users-api
     ports: ["8083:8083"]
+    environment:
+      # --- ¡LA SOLUCIÓN PARA JAVA! ---
+      # Las aplicaciones Spring Boot usan SERVER_PORT para configurar el puerto.
+      - SERVER_PORT=8083
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    depends_on: [ zipkin ]
+    networks:
+      - microservices-network
 
   auth-api:
     build: ./auth-api
-    ports: ["8081:8081"]
+    container_name: auth-api
+    environment:
+      - AUTH_API_PORT=8081
+      - USERS_API_ADDRESS=http://users-api:8083
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
+    depends_on:
+      - users-api 
+      - zipkin
+    networks:
+      - microservices-network
+    command: ["/wait-for-it.sh", "users-api:8083", "--", "/auth-api"]
 
   todos-api:
     build: ./todos-api
+    container_name: todos-api
     environment:
       - REDIS_HOST=redis
       - USERS_API_URL=http://users-api:8083
+    
+      - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
     ports: ["8082:8082"]
-    depends_on: [ redis, users-api ]
+    depends_on: [ redis, users-api, zipkin ]
+    networks:
+      - microservices-network
 
   log-message-processor:
     build: ./log-message-processor
+    container_name: log-message-processor
     environment:
       - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_CHANNEL=messages
     depends_on: [ redis ]
+    networks:
+      - microservices-network
 
   frontend:
-    build: ./frontend
-    ports: ["8080:80"]
-    depends_on: [ auth-api, users-api, todos-api ]
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        
+        - VUE_APP_ZIPKIN_URL=http://localhost:9411/api/v2/spans
+        
+        - VUE_APP_AUTH_API_URL=http://localhost:8081
+        - VUE_APP_TODOS_API_URL=http://localhost:8082
+    container_name: frontend
+    ports: ["8087:80"]
+    depends_on: [ auth-api, users-api, todos-api, zipkin ]
+    networks:
+      - microservices-network

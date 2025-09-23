@@ -13,6 +13,8 @@
     "express": "^4.15.4",
     "express-jwt": "^5.3.0",
     "memory-cache": "^0.2.0",
+    "opossum": "^6.0.0",
+    "request-promise-native": "^1.0.9",
     "redis": "^2.8.0",
     "zipkin": "^0.11.2",
     "zipkin-context-cls": "^0.11.0",

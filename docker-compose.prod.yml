@@ -20,6 +20,7 @@ services:
     image: app/log-message-processor:${TAG}
     environment:
       - REDIS_HOST=redis
+      - REDIS_CHANNEL=messages 
     depends_on: [ redis ]
 
   frontend:

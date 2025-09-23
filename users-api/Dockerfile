@@ -1,9 +1,11 @@
-FROM maven:3.9.6-eclipse-temurin-17 AS build
+FROM maven:3.6.3-jdk-8 AS build
 WORKDIR /app
 COPY . .
-RUN mvn -q -DskipTests package
-FROM eclipse-temurin:17-jre
+RUN mvn clean package -DskipTests
+
+FROM openjdk:8-jre-alpine
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/users-api-0.0.1-SNAPSHOT.jar app.jar
 EXPOSE 8083
-ENTRYPOINT ["sh","-c","java -jar app.jar"]
+ENTRYPOINT ["java", "-jar", "app.jar"]
+
