@@ -4,25 +4,25 @@ services:
     image: redis:6-alpine
 
   users-api:
-    image: app/users-api:${TAG}
+    image: nightparker725/users-api:${TAG}
 
   auth-api:
-    image: app/auth-api:${TAG}
+    image: nightparker725/auth-api:${TAG}
 
   todos-api:
-    image: app/todos-api:${TAG}
+    image: nightparker725/todos-api:${TAG}
     environment:
       - REDIS_HOST=redis
       - USERS_API_URL=http://users-api:8083
     depends_on: [ redis, users-api ]
 
   log-message-processor:
-    image: app/log-message-processor:${TAG}
+    image: nightparker725/log-message-processor:${TAG}
     environment:
       - REDIS_HOST=redis
       - REDIS_CHANNEL=messages 
     depends_on: [ redis ]
 
   frontend:
-    image: app/frontend:${TAG}
+    image: nightparker725/frontend:${TAG}
     depends_on: [ auth-api, users-api, todos-api ]
