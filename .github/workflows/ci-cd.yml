@@ -122,4 +122,5 @@ jobs:
 
       - name: Run docker-compose
         run: |
+          export TAG=latest
           docker-compose -f docker-compose.prod.yml up -d --build
