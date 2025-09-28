@@ -31,14 +31,20 @@ jobs:
       - name: Build users-api with Maven
         run: mvn -B -f users-api/pom.xml clean package
 
-      # 2. Node.js - todos-api / frontend
-      - name: Set up Node.js
+      # 2. Node.js - todos-api
+      - name: Set up Node.js 16
         uses: actions/setup-node@v3
         with:
           node-version: 16
 
       - name: Install todos-api deps
         run: cd todos-api && npm install
+
+      # 2b. Node.js - frontend
+      - name: Set up Node.js 10
+        uses: actions/setup-node@v3
+        with:
+          node-version: 10
 
       - name: Install frontend deps
         run: cd frontend && npm install
