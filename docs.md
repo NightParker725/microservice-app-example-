@@ -50,5 +50,5 @@ La aplicación está compuesta por los siguientes microservicios:
 - **frontend** → interfaz web.  
 
 ## Diagrama de arqui:  
-![microservice-app-example](/docs/Architecture diagram.png)
+![microservice-app-example](/docs/Architecture_diagram.png)
 
