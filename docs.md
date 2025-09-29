@@ -1,25 +1,21 @@
 # Microservice App – Taller de DevOps
 
-David Henao
-
-John Lamus
+- Jhon Alexander Lamus Mora - A00372128
+- David Henao Salazar - A00394033
 
 ## Descripción General
 **Taller 1: Automatización de Infraestructura con Pipelines**.  
 - Automatización con **pipelines CI/CD**.  
 - Estrategias de branching.  
 - Patrones de diseño en la nube (**Cache-Aside** y **Circuit Breaker**).  
-- Despliegue local con **Docker Compose** y **Jenkins**.  
+- Despliegue local con **Docker Compose** y **Jenkins (Jenkins al final no sirvió debido a problemas en los jobs**.  
 
 ---
 
 ## Metodología Ágil
 Se usó un **Scrum simple**:
-- **Iteraciones (sprints)** semanales.  
-- **Roles, si fuera un grupo grande para un proceso mas masivo, en nuestro caso son roles repartidos entre 2**:  
-  - *Scrum Master*: coordinación del taller.  
-  - *Developers*: implementación de microservicios y pruebas.  
-  - *Ops*: configuración de Jenkins, Docker y despliegue.  
+- **Iteraciones (sprints)** de 2 a 3 dias.  
+- **Roles, no habian definidos perse, todos haciamos todo**
 - **Artefactos**: backlog = cada sprint entregó un incremento (infraestructura lista, pipeline corriendo, despliegue funcionando, WIP).  
 
 ---
@@ -48,6 +44,51 @@ La aplicación está compuesta por los siguientes microservicios:
 - **todos-api** → gestión de tareas.  
 - **log-message-processor** → procesamiento de logs.  
 - **frontend** → interfaz web.  
+
+## PIPELINES CI/CD en GitHub Actions
+
+pipelines se definen en `.github/workflows/ci-cd.yml`.
+
+### Estructura del trabajo
+
+#### `build-test`
+- Compila y valida cada microservicio en su pila correspondiente.
+- Comprueba las dependencias (`npm install`, `pip install`, `mvn package`, `go build`).
+- Incluye un servicio Redis para pruebas de integración.
+
+#### `docker-build-push`
+- Crea imágenes de Docker para cada servicio.
+- Se autentica con Docker Hub mediante `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN`.
+- Publica imágenes con la etiqueta `latest`.
+
+#### `deploy`
+- Inicia la aplicación con `docker-compose.prod.yml`.
+- Simula un entorno de producción. - Se ejecuta solo si los pasos anteriores se realizan correctamente.
+
+---
+
+## Secrets de GitHub requeridos
+
+Los siguientes secretos deben configurarse en el repositorio:
+
+- `DOCKERHUB_USERNAME` → Su nombre de usuario de Docker Hub.
+
+- `DOCKERHUB_TOKEN` → Token de acceso generado en Docker Hub.
+
+---
+
+## Cambios en vivo
+
+Cada vez que se realiza una subida a `master`:
+
+--- El pipeline compila y valida los servicios.
+--- Se generan nuevas imágenes de Docker.
+--- Las imágenes se publican en Docker Hub.
+--- El trabajo de implementación ejecuta `docker-compose` para lanzar la última versión.
+
+Esto garantiza que los cambios estén disponibles en el entorno sin intervención manual.
+
+---
 
 ## Diagrama de arqui:  
 ![microservice-app-example](/docs/Architecture_diagram.png)
