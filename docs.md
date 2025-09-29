@@ -71,7 +71,7 @@ pipelines se definen en `.github/workflows/ci-cd.yml`.
 
 Los siguientes secretos deben configurarse en el repositorio:
 
-- `DOCKERHUB_USERNAME` → Su nombre de usuario de Docker Hub.
+- `DOCKERHUB_USERNAME` → Nombre de usuario de Docker Hub.
 
 - `DOCKERHUB_TOKEN` → Token de acceso generado en Docker Hub.
 
