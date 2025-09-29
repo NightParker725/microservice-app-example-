@@ -5,13 +5,11 @@ networks:
     driver: bridge
 
 services:
-  # --- Servicio de Zipkin ---
-  # Añadido el servicio oficial de Zipkin para el tracing distribuido.
+  
   zipkin:
     image: openzipkin/zipkin
     container_name: zipkin
     ports:
-      # El puerto 9411 es para la interfaz web de Zipkin.
       - "9411:9411"
     networks:
       - microservices-network
@@ -28,8 +26,6 @@ services:
     container_name: users-api
     ports: ["8083:8083"]
     environment:
-      # --- ¡LA SOLUCIÓN PARA JAVA! ---
-      # Las aplicaciones Spring Boot usan SERVER_PORT para configurar el puerto.
       - SERVER_PORT=8083
       - ZIPKIN_URL=http://zipkin:9411/api/v2/spans
       - JWT_SECRET=PRFT
