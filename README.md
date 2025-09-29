@@ -16,64 +16,67 @@ In each folder you can find a more in-depth explanation of each component:
 4. [Log Message Processor](/log-message-processor) is a queue processor written in Python. Its purpose is to read messages from a Redis queue and print them to standard output.
 5. [Frontend](/frontend) Vue application, provides UI.
 
-## Estrategia de Branching
+## Branching Strategy
 
-Para este proyecto se recomienda usar **GitHub Flow**, ya que es:  
-- Simple y ligero.  
-- Centrado en **deploys frecuentes**.  
-- Cada nueva funcionalidad se trabaja en una rama (`feature/...`) y se integra a `main` mediante **Pull Requests**.  
-- El pipeline se activa en `main` y `develop`, garantizando cambios en vivo y despliegue continuo.
+For this project, **GitHub Flow** is recommended because it is:
 
-### Comparación con otras estrategias
-- **GitFlow** → más robusto, útil en proyectos grandes con ciclos de release definidos.  
-- **Trunk-Based Development** → útil para integración continua extrema, pero requiere un equipo muy disciplinado.  
-- **GitHub Flow** → mejor balance para este proyecto académico: simplicidad + CI/CD directo.  
+- Simple and lightweight.
+- Focused on frequent deployments.
+- Each new feature is developed in a branch (`feature/...`) and integrated into `main` through Pull Requests.
+- The pipeline is triggered on `main` and `develop`, ensuring live changes and continuous deployment.
 
----
+### Comparison with Other Strategies
 
-## Pipeline CI/CD en GitHub Actions
-
-El pipeline está definido en `.github/workflows/ci-cd.yml`.  
-
-### Estructura de jobs
-1. **build-test**  
-   - Compila y valida cada microservicio en su respectivo stack.  
-   - Verifica dependencias (`npm install`, `pip install`, `mvn package`, `go build`).  
-   - Incluye servicio Redis para pruebas de integración.  
-
-2. **docker-build-push**  
-   - Construye imágenes Docker para cada servicio.  
-   - Autentica con Docker Hub usando `DOCKERHUB_USERNAME` y `DOCKERHUB_TOKEN`.  
-   - Publica imágenes con el tag `latest`.  
-
-3. **deploy**  
-   - Levanta la aplicación con `docker-compose.prod.yml`.  
-   - Simula un entorno de producción.  
-   - Se ejecuta solo si los pasos anteriores pasan correctamente.  
+- **GitFlow:** More robust, useful in large projects with defined release cycles.
+- **Trunk-Based Development:** Useful for extreme continuous integration, but requires a very disciplined team.
+- **GitHub Flow:** Best balance for this academic project: simplicity + direct CI/CD.
 
 ---
 
-## Secrets en GitHub
+## CI/CD Pipeline in GitHub Actions
 
-Se requieren los siguientes **secrets configurados en el repositorio**:
+The pipeline is defined in `.github/workflows/ci-cd.yml`.
 
-- `DOCKERHUB_USERNAME` → usuario de Docker Hub.  
-- `DOCKERHUB_TOKEN` → token de acceso generado en Docker Hub.  
+### Job Structure
+
+#### `build-test`
+- Compiles and validates each microservice in its respective stack.
+- Checks dependencies (`npm install`, `pip install`, `mvn package`, `go build`).
+- Includes a Redis service for integration testing.
+
+#### `docker-build-push`
+- Builds Docker images for each service.
+- Authenticates with Docker Hub using `DOCKERHUB_USERNAME` and `DOCKERHUB_TOKEN`.
+- Publishes images with the `latest` tag.
+
+#### `deploy`
+- Brings up the application with `docker-compose.prod.yml`.
+- Simulates a production environment.
+- Runs only if the previous steps succeed.
 
 ---
 
-## Cambios en Vivo
+## GitHub Secrets Required
 
-Cada vez que se hace un **push a `main` o `develop`**:
-1. El pipeline construye y valida los servicios.  
-2. Se generan nuevas imágenes Docker.  
-3. Se publican en Docker Hub.  
-4. El `deploy` ejecuta `docker-compose` para levantar la última versión.  
+The following secrets must be configured in the repository:
 
-Esto asegura que los cambios estén disponibles en el entorno sin intervención manual.  
+- `DOCKERHUB_USERNAME` → Your Docker Hub username.
+- `DOCKERHUB_TOKEN` → Access token generated in Docker Hub.
 
 ---
 
+## Live Changes
+
+Every time a push is made to `main` or `develop`:
+
+- The pipeline builds and validates the services.
+- New Docker images are generated.
+- Images are published to Docker Hub.
+- The deploy job runs `docker-compose` to launch the latest version.
+
+This ensures that changes are available in the environment without manual intervention.
+
+---
 
 ## Architecture
 
